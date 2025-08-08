@@ -19,7 +19,7 @@ export default function App() {
           initialRouteName="Home"
           screenOptions={{
             headerStyle: {
-              backgroundColor: "#4a90e2",
+              backgroundColor: "#98FF98",
             },
             headerTintColor: "#fff",
             headerTitleStyle: {
@@ -30,7 +30,7 @@ export default function App() {
               backgroundColor: "#fff",
               width: 250,
             },
-            drawerActiveTintColor: "#4a90e2",
+            drawerActiveTintColor: "#98FF98",
             drawerInactiveTintColor: "#555",
             drawerLabelStyle: {
               fontSize: 16,

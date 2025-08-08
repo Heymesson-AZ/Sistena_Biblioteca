@@ -5,12 +5,21 @@ import BotaoVoltar from "../components/botaoVoltar";
 import InputDescricao from "../components/inputDescricao";
 import BotaoAdicionar from "../components/botaoAdcionar";
 import Cabecalho from "../components/textoCabecalho";
+import BotaoConsultar from "../components/botaoConsultar";
 import AlertaCustomizado from "../components/alertaCustomizado";
 import { db } from "../../firebaseConfig";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 
 const Genero = () => {
   const [nomeGenero, setNomeGenero] = useState("");
+  const [nomeConsulta, setNomeConsulta] = useState("");
   const [genero, setGenero] = useState([]);
   // Controle do alerta
   const [alertaVisivel, setAlertaVisivel] = useState(false);
@@ -58,10 +67,23 @@ const Genero = () => {
     }
   }
 
-  useEffect(() => {
-    visualizarTodos();
-  }, []);
-
+  // funcoao de consultar
+  async function consultarGenero() {
+    try {
+      const colecao = collection(db, "Genero");
+      const q = query(colecao, where("nome_genero", "==", nomeConsulta));
+      const genero = await getDocs(q);
+      const lista = genero.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setGenero(lista);
+      setNomeConsulta("");
+    } catch (error) {
+      setTipoAlerta("erro");
+      setMensagemAlerta("Erro ao buscar Genero.");
+      setTimeout(() => setAlertaVisivel(false), 2000);
+    } finally {
+      setAlertaVisivel(false);
+    }
+  }
   return (
     <View style={styles.container}>
       <Cabecalho texto="Inserir Genero" />
@@ -75,12 +97,21 @@ const Genero = () => {
       <View style={styles.footer}>
         <BotaoVoltar />
       </View>
-      <AlertaCustomizado
-        visivel={alertaVisivel}
-        tipo={tipoAlerta}
-        descricao={mensagemAlerta}
-        onFechar={() => setAlertaVisivel(false)}
-      />
+
+      <View style={styles.linha} />
+      <Cabecalho texto="Consultar Genero" />
+      <View style={styles.label}>
+        <Text>Digite o nome do Genero:</Text>
+      </View>
+      <View style={styles.components}>
+        <InputDescricao
+          value={nomeConsulta}
+          onChangeText={setNomeConsulta}
+          placeholder={"Nome do Genero"}
+        />
+        <BotaoConsultar onPress={consultarGenero} />
+      </View>
+      <View style={styles.linha} />
       <View style={styles.lista}>
         <Cabecalho texto="Visualizar Generos" />
         <FlatList
@@ -94,6 +125,12 @@ const Genero = () => {
           )}
         />
       </View>
+      <AlertaCustomizado
+        visivel={alertaVisivel}
+        tipo={tipoAlerta}
+        descricao={mensagemAlerta}
+        onFechar={() => setAlertaVisivel(false)}
+      />
       <StatusBar style="auto" />
     </View>
   );
@@ -133,6 +170,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     shadowColor: "#000",
+  },
+  linha: {
+    height: 1,
+    backgroundColor: "#ccc",
+    width: "100%",
+    marginVertical: 12,
   },
 });
 export default Genero;

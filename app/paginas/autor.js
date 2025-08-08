@@ -21,7 +21,6 @@ const Autor = () => {
   const [nome, setNome] = useState("");
   const [nomeConsulta, setNomeConsulta] = useState("");
   const [autores, setAutores] = useState([]);
-  const [mostraLista, setMostrarLista] = useState("");
   // Controle do alerta
   const [alertaVisivel, setAlertaVisivel] = useState(false);
   const [tipoAlerta, setTipoAlerta] = useState("info");
@@ -41,7 +40,6 @@ const Autor = () => {
       setNome("");
       setTipoAlerta("sucesso");
       setMensagemAlerta("Autor inserido com sucesso!");
-      setMostrarLista("sim");
       setTimeout(() => setAlertaVisivel(false), 2000);
     } catch (error) {
       setTipoAlerta("erro");
@@ -65,7 +63,7 @@ const Autor = () => {
       setAlertaVisivel(false);
     }
   }
-  // funcoao de consultar o autor
+  // funcoao de consultar
   async function consultarAutor() {
     try {
       const colecao = collection(db, "Autor");
@@ -82,9 +80,6 @@ const Autor = () => {
       setAlertaVisivel(false);
     }
   }
-  useEffect(() => {
-    visualizarTodos();
-  }, mostraLista);
   return (
     <View style={styles.container}>
       <Cabecalho texto="Inserir Autor" />
@@ -104,7 +99,6 @@ const Autor = () => {
       <View style={styles.label}>
         <Text>Digite o nome do autor:</Text>
       </View>
-
       <View style={styles.components}>
         <InputDescricao
           value={nomeConsulta}

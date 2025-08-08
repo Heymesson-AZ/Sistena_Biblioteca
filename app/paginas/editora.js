@@ -5,13 +5,22 @@ import BotaoVoltar from "../components/botaoVoltar";
 import InputDescricao from "../components/inputDescricao";
 import BotaoAdicionar from "../components/botaoAdcionar";
 import Cabecalho from "../components/textoCabecalho";
+import BotaoConsultar from "../components/botaoConsultar";
 import AlertaCustomizado from "../components/alertaCustomizado";
 import { db } from "../../firebaseConfig";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 
 const Editora = () => {
   const [nomeEditora, setNomeEditora] = useState("");
   const [editora, setEditora] = useState([]);
+  const [nomeConsulta, setNomeConsulta] = useState("");
   // Controle do alerta
   const [alertaVisivel, setAlertaVisivel] = useState(false);
   const [tipoAlerta, setTipoAlerta] = useState("info");
@@ -56,9 +65,23 @@ const Editora = () => {
       setAlertaVisivel(true);
     }
   }
-  useEffect(() => {
-    visualizarTodos();
-  }, []);
+  // funcao de consultar
+  async function consultarEditora() {
+    try {
+      const colecao = collection(db, "Editora");
+      const q = query(colecao, where("nome_editora", "==", nomeConsulta));
+      const editora = await getDocs(q);
+      const lista = editora.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setEditora(lista);
+      setNomeConsulta("");
+    } catch (error) {
+      setTipoAlerta("erro");
+      setMensagemAlerta("Erro ao buscar Editora.");
+      setTimeout(() => setAlertaVisivel(false), 2000);
+    } finally {
+      setAlertaVisivel(false);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -73,25 +96,42 @@ const Editora = () => {
       <View style={styles.footer}>
         <BotaoVoltar />
       </View>
+      <View style={styles.linha} />
+      <Cabecalho texto="Consultar Editora" />
+      <View style={styles.label}>
+        <Text>Digite o nome da editora:</Text>
+      </View>
+      <View style={styles.components}>
+        <InputDescricao
+          value={nomeConsulta}
+          onChangeText={setNomeConsulta}
+          placeholder={"Nome da Editora"}
+        />
+        <BotaoConsultar onPress={consultarEditora} />
+      </View>
+      <View style={styles.linha} />
+      <View style={styles.lista}>
+        <Cabecalho texto="Visualizar Editora" />
+        <FlatList
+          style={styles.FlatList}
+          data={editora}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={{ marginVertical: 8 }}>
+              <Text>{item.nome_editora}</Text>
+            </View>
+          )}
+        />
+        <View style={styles.footer}>
+          <BotaoVoltar />
+        </View>
+      </View>
       <AlertaCustomizado
         visivel={alertaVisivel}
         tipo={tipoAlerta}
         descricao={mensagemAlerta}
         onFechar={() => setAlertaVisivel(false)}
       />
-      <View style={styles.lista}>
-        <Cabecalho texto="Visualizar Editoras" />
-        <FlatList
-          style={styles.FlatList}
-          data={editora}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={{ marginVertical: 5 }}>
-              <Text>{item.nome_editora}</Text>
-            </View>
-          )}
-        />
-      </View>
       <StatusBar style="auto" />
     </View>
   );
@@ -131,6 +171,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     shadowColor: "#000",
+  },
+  linha: {
+    height: 1,
+    backgroundColor: "#ccc",
+    width: "100%",
+    marginVertical: 12,
   },
 });
 
